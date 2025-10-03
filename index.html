@@ -252,13 +252,20 @@ function loadVideo(i){ if(i>=playlist.length)i=0; currentIndex=i; video.src=play
 nextBtn.addEventListener('click',()=>loadVideo(currentIndex+1));
 video.addEventListener('ended',()=>loadVideo(currentIndex+1));
 
-/* ✅ Welcome Popup */
-window.addEventListener("load", () => {
-  const popup = document.getElementById("welcomePopup");
-  setTimeout(() => {
-    popup.classList.add("fade-out");
-  }, 2500); // show 2.5s then fade
-});
+ /* ✅ Welcome Popup */
+    window.addEventListener("load", () => {
+      const popup = document.getElementById("welcomePopup");
+
+      // Auto-hide after 2.5s
+      setTimeout(() => {
+        popup.classList.add("fade-out");
+      }, 2500);
+
+      // Hide immediately on click
+      popup.addEventListener("click", () => {
+        popup.classList.add("fade-out");
+      });
+    });
 
 /* Icon Slider */
 const wrapper=document.getElementById('iconWrapper');
