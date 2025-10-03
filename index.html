@@ -9,6 +9,8 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html,body { height: 100%; font-family: Arial, Helvetica, sans-serif; color:#fff; }
 
+:root { --accent:#00d1ff; }
+
 /* BACKGROUND VIDEO */
 #bg-video {
   position: fixed; inset: 0;
@@ -16,6 +18,56 @@ html,body { height: 100%; font-family: Arial, Helvetica, sans-serif; color:#fff;
   object-fit: cover;
   z-index: -2;
   filter: brightness(0.55);
+}
+
+/* 🔹 Welcome Popup */
+.welcome-popup {
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter: blur(6px);
+  z-index:9999;
+  transition: opacity 1s ease;
+}
+.welcome-popup.fade-out {
+  opacity:0;
+  pointer-events:none;
+}
+.welcome-content {
+  text-align:center;
+  animation: slideUp 0.8s ease;
+}
+.welcome-content img {
+  width:160px;
+  height:160px;
+  border-radius:50%;
+  border:4px solid var(--accent);
+  box-shadow:0 0 30px rgba(0,209,255,0.5);
+  animation:pulse 2s infinite;
+}
+.welcome-content h1 {
+  margin-top:1rem;
+  font-size:1.8rem;
+  font-weight:800;
+  color:var(--accent);
+  text-shadow:0 0 10px rgba(0,209,255,0.6);
+}
+.welcome-content p {
+  font-size:0.9rem;
+  color:#ddd;
+  margin-top:0.5rem;
+}
+
+@keyframes pulse {
+  0%,100% { transform:scale(1); }
+  50% { transform:scale(1.05); }
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity:0; }
+  to { transform: translateY(0); opacity:1; }
 }
 
 /* NAVBAR */
@@ -31,7 +83,7 @@ html,body { height: 100%; font-family: Arial, Helvetica, sans-serif; color:#fff;
 }
 .side-nav.open { right: 0; }
 .nav-link { display:flex; align-items:center; gap:10px; color:#fff; text-decoration:none; padding:8px 6px; border-radius:6px; }
-.nav-link:hover { background: rgba(255,255,255,0.04); color:#00d1ff; }
+.nav-link:hover { background: rgba(255,255,255,0.04); color:var(--accent); }
 .nav-icon { width:20px; height:20px; object-fit:contain; }
 
 /* MAIN LAYOUT */
@@ -84,7 +136,7 @@ main { padding-bottom: 80px; }
   background:rgba(255,255,255,0.35);
   border:0; cursor:pointer; transition:background .2s;
 }
-.dot.active { background:#00d1ff; }
+.dot.active { background:var(--accent); }
 
 /* BOTTOM CAROUSEL */
 .carousel { position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:center; gap:18px; padding:10px 12px; background: rgba(0,0,0,0.55); z-index:1000; }
@@ -104,6 +156,15 @@ main { padding-bottom: 80px; }
   <video autoplay muted loop playsinline id="bg-video" aria-hidden="true">
     <source src="media/background/space.mp4" type="video/mp4">
   </video>
+
+  <!-- 👋 Welcome Popup -->
+  <div id="welcomePopup" class="welcome-popup">
+    <div class="welcome-content">
+      <img src="media/icons/gradio.png" alt="Welcome Logo">
+      <h1>Welcome to Mobile Portal</h1>
+      <p>With DJ Blayne Duero Castillo ...</p>
+    </div>
+  </div>
 
   <!-- Navbar -->
   <nav class="navbar">
@@ -190,6 +251,14 @@ let currentIndex = 0;
 function loadVideo(i){ if(i>=playlist.length)i=0; currentIndex=i; video.src=playlist[i]; video.play();}
 nextBtn.addEventListener('click',()=>loadVideo(currentIndex+1));
 video.addEventListener('ended',()=>loadVideo(currentIndex+1));
+
+/* ✅ Welcome Popup */
+window.addEventListener("load", () => {
+  const popup = document.getElementById("welcomePopup");
+  setTimeout(() => {
+    popup.classList.add("fade-out");
+  }, 2500); // show 2.5s then fade
+});
 
 /* Icon Slider */
 const wrapper=document.getElementById('iconWrapper');
