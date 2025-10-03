@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Offline — Mini-Play (Spotify-style)</title>
+  <meta name="description" content="Offline Spotify-like interface for local use. Place assets in the assets/ folder." />
+  <style>
+    :root{--bg:#121212;--panel:#181818;--muted:#b3b3b3;--accent:#1db954;--glass:rgba(255,255,255,0.03);}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:#fff;background:linear-gradient(180deg,#0f0f10 0%, #0b0b0c 100%)}
+    .app{display:grid;grid-template-columns:260px 1fr;gap:18px;height:100vh;padding:18px}
+    .sidebar{background:var(--panel);border-radius:12px;padding:18px;overflow:auto}
+    .logo{display:flex;gap:10px;align-items:center;font-weight:700}
+    .logo svg{width:36px;height:36px}
+    nav{margin-top:24px}
+    nav a{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;color:var(--muted);text-decoration:none}
+    nav a:hover{background:var(--glass);color:#fff}
+    .playlists{margin-top:18px;border-top:1px solid rgba(255,255,255,0.03);padding-top:12px}
+    .main{display:flex;flex-direction:column;gap:18px}
+    .top{display:flex;justify-content:space-between;align-items:center}
+    .search{background:var(--panel);padding:10px;border-radius:999px;display:flex;align-items:center;gap:10px;width:420px}
+    .search input{background:transparent;border:0;outline:none;color:#fff;width:100%}
+    .content{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    .hero{background:linear-gradient(180deg, rgba(29,185,84,0.06), transparent);padding:18px;border-radius:12px;display:flex;gap:16px;align-items:center}
+    .cover{width:120px;height:120px;border-radius:8px;flex:0 0 120px;background:#222;display:flex;align-items:center;justify-content:center}
+    .cover img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+    .album-info h2{margin:0 0 6px 0}
+    .tracks{background:var(--panel);padding:14px;border-radius:12px}
+    .track{display:grid;grid-template-columns:40px 1fr 60px;gap:12px;align-items:center;padding:8px;border-radius:8px}
+    .track:hover{background:rgba(255,255,255,0.02)}
+    .track .title{font-size:14px}
+    .track .artist{color:var(--muted);font-size:12px}
+    .play-btn{background:transparent;border:0;color:var(--muted);cursor:pointer}
+    .player{position:fixed;left:18px;right:18px;bottom:18px;background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);backdrop-filter:blur(6px);padding:12px;border-radius:12px;display:flex;align-items:center;gap:12px}
+    .player .progress{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden}
+    .progress > i{display:block;height:100%;background:var(--accent);width:0%}
+    .controls{display:flex;gap:8px;align-items:center}
+    .small{font-size:12px;color:var(--muted)}
+    /* Responsive */
+    @media (max-width:880px){.app{grid-template-columns:1fr;height:100%;padding:12px}.sidebar{display:none}.content{grid-template-columns:1fr}.search{width:100%}.player{left:12px;right:12px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="white" opacity="0.08"/><path d="M7 12.5C8.2 11.8 9.7 11.5 11.5 11.9C13.3 12.3 14.9 13.3 16.5 13.9" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/></svg>
+        Mini-Play
+      </div>
+      <nav>
+        <a href="#" data-nav><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Home</a>
+        <a href="#" data-nav><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/></svg> Browse</a>
+        <a href="#" data-nav><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg> Radio</a>
+      </nav>
+      <div class="playlists">
+        <div class="small">YOUR PLAYLISTS</div>
+        <ul style="list-style:none;padding:0;margin:10px 0 0 0">
+          <li style="padding:8px 6px;border-radius:6px;color:var(--muted)"><a href="#">Chill Vibes</a></li>
+          <li style="padding:8px 6px;border-radius:6px;color:var(--muted)"><a href="#">Top Hits</a></li>
+          <li style="padding:8px 6px;border-radius:6px;color:var(--muted)"><a href="#">Workout</a></li>
+          <li style="padding:8px 6px;border-radius:6px;color:var(--muted)"><a href="#">Classics</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="top">
+        <div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.5" cy="11.5" r="5" stroke="currentColor" stroke-width="1.6"/></svg>
+          <input id="searchInput" placeholder="Search songs, artists, albums" />
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="small">Offline Mode</div>
+          <button id="shuffleBtn" title="Shuffle" style="background:transparent;border:0;color:var(--muted);cursor:pointer">🔀</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <section>
+          <div class="hero">
+            <div class="cover"><img id="heroCover" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='100%' height='100%' fill='%23222'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='28' fill='%23bfbfbf'>Album Art</text></svg>" alt="cover"></div>
+            <div class="album-info">
+              <h2 id="heroTitle">Local Mix — Mini-Play</h2>
+              <div class="small" id="heroDesc">5 songs • Offline</div>
+              <div style="margin-top:10px"><button id="playAll" style="background:var(--accent);border:0;padding:8px 12px;border-radius:999px;color:#000;font-weight:700;cursor:pointer">Play</button></div>
+            </div>
+          </div>
+
+          <div class="tracks" id="tracks">
+            <!-- Tracks will be injected here -->
+          </div>
+        </section>
+
+        <aside style="background:var(--panel);padding:14px;border-radius:12px">
+          <h3 style="margin:0 0 8px 0">Up Next</h3>
+          <div id="upnext" style="display:flex;flex-direction:column;gap:8px"></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div class="player" id="playerBar">
+    <div style="width:56px;height:56px;border-radius:6px;overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center"><img id="playerCover" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%23222'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='20' fill='%23bfbfbf'>Art</text></svg>" style="width:100%;height:100%;object-fit:cover"></div>
+    <div style="min-width:200px;max-width:320px">
+      <div id="playerTitle">Nothing Playing</div>
+      <div class="small" id="playerArtist">—</div>
+    </div>
+    <div class="controls">
+      <button id="prev" class="play-btn">⏮️</button>
+      <button id="playPause" class="play-btn" style="font-size:20px">▶️</button>
+      <button id="next" class="play-btn">⏭️</button>
+    </div>
+    <div class="progress" style="margin:0 12px 0 12px"><i id="progressBar"></i></div>
+    <div class="small" id="time">0:00 / 0:00</div>
+  </div>
+
+  <script>
+    // Sample offline tracks metadata. Put matching files in assets/audio/track1.mp3 etc. 
+    const tracks = [
+      {id:1,title:'Sunrise Loop',artist:'Local Artist',file:'assets/audio/track1.mp3',cover:null,duration:'3:18'},
+      {id:2,title:'City Nights',artist:'The Locals',file:'assets/audio/track2.mp3',cover:null,duration:'4:05'},
+      {id:3,title:'Easy Breeze',artist:'Mini Band',file:'assets/audio/track3.mp3',cover:null,duration:'2:47'},
+      {id:4,title:'Retro Drive',artist:'Synth One',file:'assets/audio/track4.mp3',cover:null,duration:'3:56'},
+      {id:5,title:'Finale',artist:'Composer',file:'assets/audio/track5.mp3',cover:null,duration:'5:12'}
+    ];
+
+    const tracksEl = document.getElementById('tracks');
+    const upnextEl = document.getElementById('upnext');
+    const playerTitle = document.getElementById('playerTitle');
+    const playerArtist = document.getElementById('playerArtist');
+    const playerCover = document.getElementById('playerCover');
+    const heroCover = document.getElementById('heroCover');
+    const progressBar = document.getElementById('progressBar');
+    const timeEl = document.getElementById('time');
+
+    let currentIndex = -1;
+    let audio = new Audio();
+    audio.preload = 'metadata';
+
+    function formatTime(s){
+      if(isNaN(s)) return '0:00';
+      const m = Math.floor(s/60); const sec = Math.floor(s%60).toString().padStart(2,'0');
+      return m+':'+sec;
+    }
+
+    function renderTracks(list){
+      tracksEl.innerHTML='';
+      list.forEach((t,i)=>{
+        const row = document.createElement('div'); row.className='track';
+        row.innerHTML = `
+          <div style="width:40px;height:40px;border-radius:6px;overflow:hidden;background:#222;display:flex;align-items:center;justify-content:center"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%23222'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='14' fill='%23bfbfbf'>${encodeURIComponent(t.title)}</text></svg>" style="width:100%;height:100%;object-fit:cover"></div>
+          <div>
+            <div class="title">${t.title}</div>
+            <div class="artist">${t.artist}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${t.duration}</div>
+            <button class="play-btn" data-index="${i}">▶️</button>
+          </div>
+        `;
+        tracksEl.appendChild(row);
+      });
+
+      // attach listeners
+      document.querySelectorAll('.play-btn[data-index]').forEach(b=>b.addEventListener('click',e=>{
+        const idx = Number(e.currentTarget.dataset.index);
+        playIndex(idx);
+      }));
+    }
+
+    function updateUpNext(){
+      upnextEl.innerHTML='';
+      const list = tracks.slice(currentIndex+1).concat(tracks.slice(0,currentIndex+1));
+      list.slice(0,4).forEach(t=>{
+        const el = document.createElement('div'); el.className='small'; el.textContent = t.title + ' — ' + t.artist; upnextEl.appendChild(el);
+      });
+    }
+
+    function playIndex(idx){
+      currentIndex = idx;
+      const t = tracks[currentIndex];
+      audio.src = t.file; // local path
+      audio.play().catch(e=>console.warn('Unable to play audio. Place files in the assets/audio/ folder or allow autoplay.'));
+      playerTitle.textContent = t.title; playerArtist.textContent = t.artist;
+      // set covers (still placeholder svg)
+      const svg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><rect width='100%' height='100%' fill='%23222'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='28' fill='%23bfbfbf'>${encodeURIComponent(t.title)}</text></svg>`;
+      playerCover.src = svg; heroCover.src = svg;
+      updateUpNext();
+      document.getElementById('playPause').textContent = '⏸️';
+    }
+
+    document.getElementById('playAll').addEventListener('click',()=>{
+      playIndex(0);
+    });
+
+    document.getElementById('playPause').addEventListener('click',()=>{
+      if(audio.paused){ audio.play().catch(()=>{}); document.getElementById('playPause').textContent='⏸️' }
+      else { audio.pause(); document.getElementById('playPause').textContent='▶️' }
+    });
+
+    document.getElementById('next').addEventListener('click',()=>{
+      playIndex((currentIndex+1)%tracks.length);
+    });
+    document.getElementById('prev').addEventListener('click',()=>{
+      playIndex((currentIndex-1+tracks.length)%tracks.length);
+    });
+
+    audio.addEventListener('timeupdate',()=>{
+      const pct = (audio.currentTime / (audio.duration||1)) * 100;
+      progressBar.style.width = pct + '%';
+      timeEl.textContent = formatTime(audio.currentTime) + ' / ' + (isNaN(audio.duration)? '0:00' : formatTime(audio.duration));
+    });
+    audio.addEventListener('ended',()=>{
+      playIndex((currentIndex+1)%tracks.length);
+    });
+
+    // search
+    document.getElementById('searchInput').addEventListener('input',e=>{
+      const q = e.target.value.toLowerCase();
+      renderTracks(tracks.filter(t=>t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q)));
+    });
+
+    // initial render
+    renderTracks(tracks);
+    updateUpNext();
+
+    // small usability: click row to play
+    tracksEl.addEventListener('click',e=>{
+      const row = e.target.closest('.track');
+      if(!row) return;
+      const idx = Array.from(tracksEl.children).indexOf(row);
+      if(idx>=0) playIndex(idx);
+    });
+
+    // Keyboard space for play/pause
+    document.addEventListener('keydown',e=>{ if(e.code==='Space'){ e.preventDefault(); document.getElementById('playPause').click(); } });
+  </script>
+</body>
+</html>

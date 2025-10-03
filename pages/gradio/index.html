@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Offline Radio Station — Demo</title>
+  <meta name="description" content="Offline radio-station UI (single-file). Drop into a local folder with assets/audio and assets/img." />
+  <style>
+    /* Simple, responsive styling */
+    :root{--bg:#0b1020;--card:#0f1724;--accent:#1db954;--muted:#9aa4b2;--glass: rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,#071028 0%, #081226 60%);color:#e6eef6;display:flex;align-items:center;justify-content:center;padding:24px}
+    .container{width:100%;max-width:980px;background:var(--card);border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.6);overflow:hidden}
+    header{display:flex;gap:16px;padding:18px;background:linear-gradient(90deg,rgba(255,255,255,0.02),transparent)}
+    .logo{width:84px;height:84px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--glass);display:grid;place-items:center}
+    .logo img{width:100%;height:100%;object-fit:cover}
+    .station-meta{flex:1}
+    .station-meta h1{margin:0;font-size:20px;letter-spacing:0.2px}
+    .station-meta p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .controls{display:flex;align-items:center;gap:12px}
+    main{display:grid;grid-template-columns:1fr 360px;gap:18px;padding:18px}
+    .player{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:16px;border-radius:12px}
+    .now-playing{display:flex;gap:12px;align-items:center}
+    .cover{width:120px;height:120px;border-radius:8px;overflow:hidden;background:var(--glass)}
+    .cover img{width:100%;height:100%;object-fit:cover}
+    .track-info{flex:1}
+    .track-info h2{margin:0;font-size:18px}
+    .track-info p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .seek{margin-top:12px}
+    .seek input[type=range]{width:100%}
+    .buttons{display:flex;gap:8px;margin-top:12px}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
+    button.primary{background:var(--accent);border:none;color:#051014}
+    .playlist{background:var(--card);padding:12px;border-radius:12px;height:420px;overflow:auto}
+    .item{display:flex;gap:10px;padding:8px;border-radius:8px;align-items:center}
+    .item:hover{background:rgba(255,255,255,0.02)}
+    .item .idx{width:36px;text-align:center;color:var(--muted)}
+    .item .meta{flex:1}
+    .item .meta b{display:block}
+    .right-col{display:flex;flex-direction:column;gap:12px}
+    .volume{display:flex;align-items:center;gap:8px;padding:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px}
+    .schedule{padding:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px}
+    footer{padding:14px 18px;color:var(--muted);font-size:13px;background:linear-gradient(0deg, rgba(255,255,255,0.01), transparent)}
+    .small{font-size:12px;color:var(--muted)}
+    @media (max-width:880px){main{grid-template-columns:1fr;}.right-col{order:2}}
+  </style>
+</head>
+<body>
+  <div class="container" role="application">
+    <header>
+      <div class="logo"><img src="assets/img/logo.png" alt="Station logo"></div>
+      <div class="station-meta">
+        <h1>RADIO OFFLINE FM</h1>
+        <p>Local curated hits • Nonstop music • Demo offline player</p>
+        <div class="small">Stream works offline — put audio files into <code>assets/audio/</code></div>
+      </div>
+      <div class="controls">
+        <button id="playPause" class="primary">Play</button>
+        <button id="prevBtn">Prev</button>
+        <button id="nextBtn">Next</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="player">
+        <div class="now-playing">
+          <div class="cover"><img id="coverArt" src="assets/img/cover.jpg" alt="cover"></div>
+          <div class="track-info">
+            <h2 id="title">No track selected</h2>
+            <p id="artist">—</p>
+            <div class="small" id="status">Stopped</div>
+          </div>
+        </div>
+
+        <div class="seek">
+          <input id="seek" type="range" min="0" max="100" value="0">
+          <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button id="shuffleBtn">Shuffle</button>
+          <button id="repeatBtn">Repeat</button>
+          <button id="muteBtn">Mute</button>
+          <label class="small" style="margin-left:auto">Volume</label>
+          <input id="volume" type="range" min="0" max="1" step="0.01" value="1" style="width:140px">
+        </div>
+
+        <div style="margin-top:14px">
+          <div class="small">Now playing schedule</div>
+          <div id="scheduleList" class="small" style="margin-top:8px"></div>
+        </div>
+
+      </section>
+
+      <aside class="right-col">
+        <div class="playlist" id="playlist">
+          <!-- Playlist items populated by JS -->
+        </div>
+
+        <div class="schedule">
+          <strong>Today's Schedule</strong>
+          <div class="small" style="margin-top:8px">
+            06:00 — Morning Drive
+            <br>10:00 — Midday Mix
+            <br>14:00 — Local Spotlight
+            <br>18:00 — Evening Hits
+            <br>22:00 — Late Night Chill
+          </div>
+        </div>
+
+      </aside>
+    </main>
+
+    <footer>
+      <div>Instructions: Save this file as <code>index.html</code>. Create folders <code>assets/audio/</code> and <code>assets/img/</code>. Put mp3 files in <code>assets/audio/</code> (example names used below). Open the file in your browser.
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ======= Configuration: edit these filenames to match your local files ======
+    const tracks = [
+      {file: 'assets/audio/track1.mp3', title: 'Sunny Days', artist: 'DJ Offline', cover: 'assets/img/cover1.jpg'},
+      {file: 'assets/audio/track2.mp3', title: 'Night Drive', artist: 'Neon', cover: 'assets/img/cover2.jpg'},
+      {file: 'assets/audio/track3.mp3', title: 'Acoustic Breeze', artist: 'Local Artist', cover: 'assets/img/cover3.jpg'},
+      {file: 'assets/audio/track4.mp3', title: 'Electro Pulse', artist: 'Station Mix', cover: 'assets/img/cover4.jpg'},
+      {file: 'assets/audio/track5.mp3', title: 'Late Night', artist: 'Sleeper', cover: 'assets/img/cover.jpg'}
+    ];
+    // ======================================================================
+
+    // State
+    let idx = 0; let isPlaying = false; let shuffle = false; let repeat = false;
+
+    // Elements
+    const audio = new Audio(); audio.preload = 'auto';
+    const playPause = document.getElementById('playPause');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const titleEl = document.getElementById('title');
+    const artistEl = document.getElementById('artist');
+    const statusEl = document.getElementById('status');
+    const seek = document.getElementById('seek');
+    const currentTime = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const volumeEl = document.getElementById('volume');
+    const muteBtn = document.getElementById('muteBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const repeatBtn = document.getElementById('repeatBtn');
+    const coverArt = document.getElementById('coverArt');
+    const playlistEl = document.getElementById('playlist');
+    const scheduleList = document.getElementById('scheduleList');
+
+    function formatTime(s){
+      if (isNaN(s)) return '0:00';
+      const m = Math.floor(s/60); const sec = Math.floor(s%60).toString().padStart(2,'0');
+      return `${m}:${sec}`;
+    }
+
+    function loadTrack(i){
+      if (i<0) i = tracks.length-1; if (i>=tracks.length) i = 0; idx=i;
+      const t = tracks[idx];
+      audio.src = t.file;
+      titleEl.textContent = t.title || 'Unknown';
+      artistEl.textContent = t.artist || 'Unknown artist';
+      coverArt.src = t.cover || 'assets/img/cover.jpg';
+      statusEl.textContent = 'Loaded';
+      highlightPlaylist();
+    }
+
+    function play(){
+      audio.play().then(()=>{isPlaying=true; playPause.textContent='Pause'; statusEl.textContent = 'Playing';}).catch(e=>{console.warn('play failed',e); statusEl.textContent='Playback blocked — interact to start';});
+    }
+    function pause(){audio.pause(); isPlaying=false; playPause.textContent='Play'; statusEl.textContent='Paused';}
+
+    playPause.addEventListener('click',()=>{ if(isPlaying) pause(); else play(); });
+    prevBtn.addEventListener('click',()=>{ skip(-1); });
+    nextBtn.addEventListener('click',()=>{ skip(1); });
+
+    function skip(dir){
+      if (shuffle){ idx = Math.floor(Math.random()*tracks.length); }
+      else idx = (idx + dir + tracks.length) % tracks.length;
+      loadTrack(idx); if(isPlaying) play();
+    }
+
+    // Seek handling
+    audio.addEventListener('timeupdate',()=>{
+      if (!isNaN(audio.duration)){
+        const pct = (audio.currentTime / audio.duration) * 100; seek.value = pct;
+        currentTime.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+      }
+    });
+    seek.addEventListener('input',(e)=>{
+      if (!isNaN(audio.duration)){
+        const pct = e.target.value; audio.currentTime = (pct/100)*audio.duration;
+      }
+    });
+
+    // Volume
+    volumeEl.addEventListener('input',(e)=>{ audio.volume = parseFloat(e.target.value); });
+    muteBtn.addEventListener('click',()=>{ audio.muted = !audio.muted; muteBtn.textContent = audio.muted? 'Unmute':'Mute'; });
+
+    // Shuffle / Repeat
+    shuffleBtn.addEventListener('click',()=>{ shuffle = !shuffle; shuffleBtn.style.opacity = shuffle?1:0.6; });
+    repeatBtn.addEventListener('click',()=>{ repeat = !repeat; repeatBtn.style.opacity = repeat?1:0.6; });
+
+    audio.addEventListener('ended',()=>{
+      if (repeat) { audio.currentTime=0; play(); }
+      else { if(shuffle) { idx = Math.floor(Math.random()*tracks.length); loadTrack(idx); play(); } else { skip(1); }}
+    });
+
+    // Build playlist UI
+    function buildPlaylist(){
+      playlistEl.innerHTML = '';
+      tracks.forEach((t,i)=>{
+        const item = document.createElement('div'); item.className='item'; item.dataset.index=i;
+        item.innerHTML = `<div class="idx">${i+1}</div><div class="meta"><b>${t.title}</b><span class="small">${t.artist}</span></div><div class="small">${t.file.split('/').pop()}</div>`;
+        item.addEventListener('click',()=>{ loadTrack(i); play(); });
+        playlistEl.appendChild(item);
+      });
+    }
+
+    function highlightPlaylist(){
+      const items = playlistEl.querySelectorAll('.item'); items.forEach(it=>it.style.background='');
+      const cur = playlistEl.querySelector(`.item[data-index="${idx}"]`);
+      if (cur) cur.style.background = 'linear-gradient(90deg, rgba(29,185,84,0.12), transparent)';
+    }
+
+    // Simple schedule simulation: show next 3 upcoming shows with times
+    function buildSchedule(){
+      const now = new Date();
+      const out = [];
+      const showNames = ['Morning Drive','Midday Mix','Local Spotlight','Evening Hits','Late Night Chill'];
+      for (let i=0;i<3;i++){
+        const slot = new Date(now.getTime() + i*60*60*1000);
+        out.push(`${slot.getHours().toString().padStart(2,'0')}:00 — ${showNames[(now.getHours()+i)%showNames.length]}`);
+      }
+      scheduleList.innerHTML = out.join('<br>');
+    }
+
+    // Initialize
+    buildPlaylist(); buildSchedule(); loadTrack(0);
+
+    // Accessibility notes: keyboard shortcuts
+    document.addEventListener('keydown',(e)=>{
+      if (e.code === 'Space') { e.preventDefault(); if(isPlaying) pause(); else play(); }
+      if (e.code === 'ArrowRight') skip(1);
+      if (e.code === 'ArrowLeft') skip(-1);
+    });
+
+    // If files missing, show helpful message in playlist
+    function checkFilesExist(){
+      // Browsers cannot check local files directly in offline pages reliably; just warn the user.
+      const msg = document.createElement('div'); msg.className='small'; msg.style.marginTop='8px';
+      msg.textContent = 'Note: This offline player requires you to place audio files at the paths declared in the configuration (assets/audio/...). If playback fails, open the Developer Console to inspect errors.';
+      playlistEl.parentNode.insertBefore(msg, playlistEl.nextSibling);
+    }
+    checkFilesExist();
+
+  </script>
+</body>
+</html>

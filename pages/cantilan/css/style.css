@@ -1,0 +1,36 @@
+.page-header {
+  text-align: center;
+  margin: 20px;
+  color: #fff;
+}
+.page-header h1 {
+  font-size: 26px;
+  margin-bottom: 5px;
+}
+.page-header p {
+  font-size: 16px;
+  color: #ccc;
+}
+
+.content-box {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 15px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.back-home {
+  text-align: center;
+  margin: 20px;
+}
+.back-home a {
+  color: #ffcc00;
+  font-weight: bold;
+  text-decoration: none;
+}
+.back-home a:hover {
+  text-decoration: underline;
+}

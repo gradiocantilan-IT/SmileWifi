@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Citizen Charter — Offline Template (Municipality)</title>
+  <meta name="description" content="Offline citizen charter template for Philippine local government units (LGU)." />
+  <style>
+    :root{
+      --bg:#f7f9fb; --card:#fff; --muted:#6b7280; --accent:#0b5fff; --accent-2:#0b8f5f;
+      --paper-width:800px; --paper-padding:32px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; background:var(--bg); color:#111}
+    .wrap{max-width:1100px;margin:28px auto;padding:16px}
+
+    /* Header */
+    header{display:flex;gap:16px;align-items:center}
+    .logo{width:72px;height:72px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+    .logo img{width:100%;height:100%;object-fit:cover}
+    h1{font-size:20px;margin:0}
+    .subtitle{color:var(--muted);font-size:13px}
+
+    /* Controls */
+    .controls{display:flex;gap:8px;margin-top:12px}
+    button{background:var(--accent);border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,95,255,.12)}
+
+    /* Two column layout */
+    .cols{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
+    .panel{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(9,10,11,.04)}
+
+    nav .item{padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+    nav .item:hover{background:#f2f6ff}
+
+    /* Charter paper */
+    .paper{min-height:780px;padding:var(--paper-padding);max-width:var(--paper-width);margin:0 auto;background:var(--card);border-radius:10px}
+    .paper h2{margin:6px 0 8px}
+    .paper .muted{color:var(--muted);font-size:13px}
+
+    .service{border:1px dashed #e6edf8;padding:12px;border-radius:8px;margin-bottom:12px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;border:1px solid #eef3fb;font-size:14px}
+    th{background:#f4f8ff;text-align:left}
+
+    /* Flow badge */
+    .badge{background:#eef7ef;color:#136a3b;padding:6px 8px;border-radius:6px;font-weight:600}
+
+    /* Print helpers */
+    @media print{
+      body{background:#fff}
+      .wrap, .controls, nav, .panel{display:none}
+      .paper{box-shadow:none;border-radius:0;margin:0;max-width:100%;padding:10mm}
+      a[href]:after{content:""}
+    }
+
+    /* Responsive */
+    @media (max-width:880px){
+      .cols{grid-template-columns:1fr}
+      .logo{width:56px;height:56px}
+    }
+
+    /* Tiny helpers */
+    .muted-sm{color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo"><img src="icons/LGU.png" alt="LGU Logo"></div>
+      <div>
+        <h1>Municipality of Cantilan — Citizen's Charter</h1>
+        <div class="subtitle">Service commitments, steps, requirements, processing time, person-in-charge</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <button id="printBtn">Print / Save as PDF</button>
+      <button id="exportJson" class="ghost">Export JSON</button>
+      <button id="importJson" class="ghost">Import JSON</button>
+      <input type="file" id="fileIn" style="display:none" accept="application/json">
+    </div>
+
+    <div class="cols">
+      <aside class="panel">
+        <nav>
+          <div style="font-weight:700;margin-bottom:8px">Services</div>
+          <div class="item" data-id="business">Business Permit (New/Renewal) <span class="muted-sm">— click</span></div>
+          <div class="item" data-id="blotter">Police Blotter / Certification <span class="muted-sm">— click</span></div>
+          <div class="item" data-id="cedula">Cedula / Community Tax Certificate <span class="muted-sm">— click</span></div>
+          <div class="item" data-id="building">Building Permit <span class="muted-sm">— click</span></div>
+          <div class="item" data-id="other">Other Services <span class="muted-sm">— click</span></div>
+        </nav>
+
+        <hr style="margin:12px 0">
+        <div style="font-weight:700">LGU Contact</div>
+        <div class="muted-sm">Address: Brgy. Poblacion, SAMPLE TOWN</div>
+        <div class="muted-sm">Office Hours: Mon–Fri 8:00 AM – 5:00 PM</div>
+        <div class="muted-sm">Phone: (02) 1234-5678</div>
+        <div class="muted-sm">Email: info@samplelgU.ph</div>
+      </aside>
+
+      <main class="paper panel" id="paper">
+        <!-- PAGE HEADER -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <h2>Citizen's Charter — SERVICE NAME</h2>
+            <div class="muted">Republic of the Philippines • Province • Municipality</div>
+          </div>
+          <div style="text-align:right">
+            <div class="muted-sm">Version: 1.0</div>
+            <div class="muted-sm">Date: <span id="charterDate">October 2, 2025</span></div>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0">
+
+        <!-- SERVICE SUMMARY -->
+        <section>
+          <h3 style="margin:6px 0">Service Overview</h3>
+          <p class="muted-sm">Brief description of the service, who may avail, legal basis and objective.</p>
+
+          <div class="grid-2" style="margin-top:10px">
+            <div>
+              <strong>Who may avail</strong>
+              <p class="muted-sm">Residents, business owners, applicants</p>
+            </div>
+            <div>
+              <strong>Place of filing</strong>
+              <p class="muted-sm">Municipal Hall — Business Permits & Licensing Office (BPLO)</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- REQUIREMENTS -->
+        <section style="margin-top:12px">
+          <h3 style="margin:6px 0">Requirements (Documents)</h3>
+          <ul>
+            <li>Filled-up application form (available at counter)</li>
+            <li>Two (2) valid IDs</li>
+            <li>Proof of business address / contract of lease</li>
+            <li>Previous business permit (if renewal)</li>
+            <li>Tax Clearance / BIR documents (if applicable)</li>
+          </ul>
+        </section>
+
+        <!-- PROCESSING STEPS -->
+        <section style="margin-top:12px">
+          <h3 style="margin:6px 0">Procedures / Steps</h3>
+          <div class="service">
+            <ol>
+              <li>Submit requirements to counter and accomplish application form.</li>
+              <li>Assessment / evaluation by BPLO staff.</li>
+              <li>Payment of fees at the cashier; obtain official receipt.</li>
+              <li>Issuance of Business Permit / Certificate.</li>
+            </ol>
+          </div>
+
+          <table>
+            <thead>
+              <tr><th>Step</th><th>Officer-in-charge</th><th>Processing Time</th></tr>
+            </thead>
+            <tbody id="stepsTable">
+              <tr><td>Submission & Validation</td><td>Clerk - BPLO</td><td>1 day</td></tr>
+              <tr><td>Assessment</td><td>Assessor</td><td>1–2 days</td></tr>
+              <tr><td>Payment & Issuance</td><td>Cashier / BPLO</td><td>Same day</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- FEES -->
+        <section style="margin-top:12px">
+          <h3 style="margin:6px 0">Fees</h3>
+          <p class="muted-sm">Fees depend on business class. Example table below is illustrative only.</p>
+          <table>
+            <thead><tr><th>Type</th><th>Fee</th></tr></thead>
+            <tbody>
+              <tr><td>Micro Business</td><td>₱500</td></tr>
+              <tr><td>Small Business</td><td>₱1,200</td></tr>
+              <tr><td>Large Business</td><td>₱5,000</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- PERFORMANCE COMMITMENT -->
+        <section style="margin-top:12px">
+          <h3 style="margin:6px 0">Performance Commitment</h3>
+          <p class="muted-sm">We commit to process complete applications within <strong>3 working days</strong>. If delayed, contact the office listed below.</p>
+        </section>
+
+        <!-- APPEALS AND FEEDBACK -->
+        <section style="margin-top:12px">
+          <h3 style="margin:6px 0">Feedback / Complaints / Appeals</h3>
+          <p class="muted-sm">For feedback, please coordinate with the Municipal Mayor's Office or the Office of the Municipal Secretary. You may also use this contact:</p>
+          <p class="muted-sm">Email: complaints@samplelgu.ph | Phone: (02) 1234-5678</p>
+        </section>
+
+        <!-- SIGNATURE -->
+        <section style="margin-top:22px;display:flex;justify-content:space-between">
+          <div>
+            <div class="muted-sm">Prepared by:</div>
+            <div style="margin-top:10px;font-weight:700">(Name)<br><span class="muted-sm">Position / Office</span></div>
+          </div>
+          <div style="text-align:right">
+            <div class="muted-sm">Certified true and correct:</div>
+            <div style="margin-top:10px;font-weight:700">(Municipal Mayor)<br><span class="muted-sm">Date & Signature</span></div>
+          </div>
+		  
+		   <!-- ✅ NEXT PAGE LINKS -->
+        <hr style="margin:20px 0">
+        <div class="next-links" style="display:flex;justify-content:space-between;align-items:center">
+          <a href="index.html" style="text-decoration:none;color:var(--accent)">← Back to Top</a>
+          <a href="nextpage.html" style="text-decoration:none;background:var(--accent);color:#fff;padding:8px 14px;border-radius:6px">Next Page →</a>
+        </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Tiny script for interactivity, export/import -->
+    <script>
+      // Simple service templates to populate paper
+      const templates = {
+        business:{
+          name:'Business Permit (New/Renewal)',
+          who:'Business owners, sole proprietors',
+          place:'Municipal Hall — BPLO',
+          requirements:[
+            'Filled-up application form', 'Valid IDs (2)', 'Proof of business address', 'Previous permit (if renewal)'
+          ],
+          steps:[
+            ['Submission & Validation','Clerk - BPLO','1 day'],
+            ['Assessment','Assessor','1-2 days'],
+            ['Payment & Issuance','Cashier / BPLO','Same day']
+          ],
+          fees:[['Micro Business','₱500'],['Small Business','₱1,200'],['Large Business','₱5,000']]
+        },
+        blotter:{
+          name:'Police Blotter / Certification',
+          who:'Residents', place:'Municipal Police Station', requirements:['Complaint form','Valid ID'],
+          steps:[['Filing of blotter','Police desk','Same day'],['Verification','Investigator','3 days']],
+          fees:[['Certificate','₱0']]
+        },
+        cedula:{
+          name:'Community Tax Certificate (Cedula)',who:'Residents, non-residents doing business',place:'Municipal Treasurer',requirements:['Valid ID'],
+          steps:[['Application & Payment','Treasurer','Same day']],fees:[['Standard','₱20']]
+        },
+        building:{
+          name:'Building Permit',who:'Owners/Contractors',place:'Municipal Engineering Office',requirements:['Building plans','LOC','Tax Clearance'],
+          steps:[['Plan submission','Engineer','5–10 days'],['Inspection','Inspector','1–2 days'],['Issuance','MEO','Same day']],fees:[['Permit Fee','Depends on project']]
+        }
+      };
+
+      function populate(id){
+        const t = templates[id] || {name:'Service Name',who:'',place:'',requirements:[],steps:[],fees:[]};
+        document.querySelector('.paper h2').textContent = "Citizen's Charter — " + t.name;
+        document.querySelector('.paper .muted').textContent = 'Republic of the Philippines • Province • Municipality';
+        document.getElementById('charterDate').textContent = new Date().toLocaleDateString();
+
+        // Requirements
+        const reqSection = document.querySelector('.paper section:nth-of-type(2) ul');
+        reqSection.innerHTML = '';
+        t.requirements.forEach(r=>{const li=document.createElement('li');li.textContent=r;reqSection.appendChild(li)});
+
+        // Steps table
+        const tbody = document.getElementById('stepsTable'); tbody.innerHTML='';
+        t.steps.forEach(s=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${s[0]}</td><td>${s[1]}</td><td>${s[2]}</td>`;tbody.appendChild(tr)});
+
+        // Fees
+        const feeTable = document.querySelector('.paper section:nth-of-type(4) table tbody');
+        feeTable.innerHTML = '';
+        t.fees.forEach(f=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${f[0]}</td><td>${f[1]}</td>`;feeTable.appendChild(tr)});
+      }
+
+      // attach nav clicks
+      document.querySelectorAll('nav .item').forEach(el=>el.addEventListener('click',()=>populate(el.dataset.id)));
+
+      // print
+      document.getElementById('printBtn').addEventListener('click',()=>{window.print()});
+
+      // export JSON (current view)
+      document.getElementById('exportJson').addEventListener('click',()=>{
+        const title = document.querySelector('.paper h2').textContent.replace(/[^a-z0-9\-]+/gi,'_');
+        const data = {
+          title: document.querySelector('.paper h2').textContent,
+          date: document.getElementById('charterDate').textContent,
+          requirements: Array.from(document.querySelectorAll('.paper section:nth-of-type(2) ul li')).map(x=>x.textContent),
+          steps: Array.from(document.querySelectorAll('#stepsTable tr')).map(r=>Array.from(r.children).map(c=>c.textContent)),
+          fees: Array.from(document.querySelectorAll('.paper section:nth-of-type(4) table tbody tr')).map(r=>[r.children[0].textContent,r.children[1].textContent])
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)],{type:'application/json'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = title + '.json'; a.click(); URL.revokeObjectURL(a.href);
+      });
+
+      // import JSON
+      document.getElementById('importJson').addEventListener('click',()=>document.getElementById('fileIn').click());
+      document.getElementById('fileIn').addEventListener('change',e=>{
+        const f = e.target.files[0]; if(!
