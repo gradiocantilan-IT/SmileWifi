@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Mindanao Offline Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    #map { width: 100%; height: 100vh; }
+    #searchBox {
+      position: absolute;
+      top: 10px; left: 50%; transform: translateX(-50%);
+      z-index: 1000;
+      background: white; padding: 6px; border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <input type="text" id="searchBox" placeholder="Search place in Mindanao...">
+  <div id="map"></div>
+
+  <script>
+    // Create map with simple CRS
+    var map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -2
+    });
+
+    // Image dimensions (replace with your actual image size in pixels)
+    var w = 2807, h = 1422;
+    var imageUrl = 'maps/mindanao.png';
+    var bounds = [[0,0], [h,w]];
+
+    // Add image to map
+    L.imageOverlay(imageUrl, bounds).addTo(map);
+    map.fitBounds(bounds);
+
+    // Example places in Mindanao (pixel coordinates, not lat/lon!)
+    var places = [
+      { name: "Davao City", coords: [1500, 2200] },
+      { name: "Cagayan de Oro", coords: [1200, 1000] },
+      { name: "Zamboanga City", coords: [2500, 500] },
+      { name: "General Santos City", coords: [2800, 2100] }
+    ];
+
+    // Add markers
+    places.forEach(p => {
+      p.marker = L.marker(p.coords).addTo(map).bindPopup(p.name);
+    });
+
+    // Simple search
+    var searchBox = document.getElementById("searchBox");
+    searchBox.addEventListener("keyup", function(e) {
+      if (e.key === "Enter") {
+        var query = searchBox.value.toLowerCase();
+        var found = places.find(p => p.name.toLowerCase().includes(query));
+        if (found) {
+          map.setView(found.coords, 0);
+          found.marker.openPopup();
+        } else {
+          alert("Place not found in list.");
+        }
+      }
+    });
+  </script>
+</body>
+</html>
